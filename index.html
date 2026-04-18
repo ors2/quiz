@@ -11,19 +11,22 @@ body {
   color: white;
   text-align: center;
   overflow-x: hidden;
-  background: black;
+
+  /* 🔥 نفس وضوح VS Code تقريبًا */
+  background: url("dth.jpg") no-repeat center center fixed;
   background-size: cover;
 }
 
+/* 🔥 أخف من السابق عشان الصورة تبان */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(0,0,0,0.45);
   z-index: -1;
 }
 
-/* ⭐ عنوان Quiz المتحرك */
+/* ⭐ عنوان Quiz */
 .quiz-title {
   font-size: 42px;
   font-weight: bold;
@@ -42,8 +45,16 @@ body::before {
   100% { background-position: 200% 50%; }
 }
 
+/* 🔥 نفس لون العنوان */
 .subtitle {
-  color: #ccc;
+  font-size: 18px;
+  font-weight: bold;
+
+  background: linear-gradient(90deg, #ef4444, #000000, #ef4444);
+  background-size: 200% 200%;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* السؤال */
@@ -69,7 +80,10 @@ body::before {
   width: 170px;
   height: 230px;
   background: rgba(10,10,10,0.95);
+
+  /* 🔥 تثبيت اللون بدل ما يصير رمادي */
   border: 2px solid #3b0a0a;
+
   border-radius: 10px;
   cursor: pointer;
 
@@ -85,6 +99,7 @@ body::before {
   transform: scale(1.07);
 }
 
+/* الصح والخطأ */
 .correct {
   background: #14532d !important;
   border-color: #22c55e !important;
@@ -95,7 +110,7 @@ body::before {
   border-color: #ef4444 !important;
 }
 
-/* ⏱️ المؤقت */
+/* المؤقت */
 #timerBox {
   font-size: 26px;
   margin: 110px auto 10px;
@@ -106,6 +121,7 @@ body::before {
   display: inline-block;
 }
 
+/* الأخطاء */
 #errorScreen {
   display: none;
   padding: 20px;
@@ -162,6 +178,11 @@ button {
   font-weight: bold;
   color: white;
 }
+
+/* 🔥 مهم: يمنع الشاشة السوداء عند GitHub Pages */
+#gameScreen {
+  display: block;
+}
 </style>
 </head>
 
@@ -173,7 +194,6 @@ button {
 <div id="gameScreen">
   <div id="question"></div>
   <div class="doors" id="doors"></div>
-
   <div id="timerBox">الوقت: 0:00</div>
 </div>
 
@@ -192,23 +212,7 @@ const questions = [
   {q:"كره : استساغ", options:["حقد : تسامح","محبة : استحسان","رفض : رمي","ظلم : قساوة"], correct:"حقد : تسامح"},
   {q:"كتاب : صفحة", options:["مجلة : مقال","غرفة : بيت"], correct:"مجلة : مقال"},
   {q:"غش : عقاب", options:["سرعة : حادث","حليب : لبن"], correct:"سرعة : حادث"},
-  {q:"ولوج : دخول", options:["أسد : ليث","معركة : ساحة","ثوب : لباس","ليل : مساء"], correct:"أسد : ليث"},
-  {q:"قسوة : حجارة", options:["قمة : علو","ذهن : ذكاء","غيوم : تفاؤل","تدرج : سلم"], correct:"تدرج : سلم"},
-  {q:"مؤلف : كتاب", options:["كاتب : جريدة","منشد : قصيدة","قبطان : سفينة","مدرب : دورة"], correct:"قبطان : سفينة"},
-  {q:"سيل : مطر", options:["ريح : عاصفة","جبل : حصى","برد : ثلج","غيوم : سحاب"], correct:"غيوم : سحاب"},
-  {q:"رياح : هواء", options:["طوفان : ماء","كهرباء : صعق","أرض : بركان","سحاب : ثلج"], correct:"طوفان : ماء"},
-  {q:"القفاز : الحماية", options:["المجهر : التكبير","تبريد : مكيف","شتاء : معطف","سور : حائط"], correct:"المجهر : التكبير"},
-  {q:"حلوى : سكر", options:["سماء : نجوم","كتاب : ورق"], correct:"كتاب : ورق"},
-  {q:"سيل : جارف", options:["رجل : حازم","كلام : هادر","طائر : تغريد","كتاب : واسع"], correct:"رجل : حازم"},
-  {q:"خطبة : نثر", options:["عنب : فواكه","بلاغة : نحو","ورقيات : بقدونس","منازل : مساكن"], correct:"بلاغة : نحو"},
-  {q:"كلام : ثرثرة", options:["طل : وابل","كرم : جود","فوز : جائزة","طوبة : جفاف"], correct:"كرم : جود"},
-  {q:"لحن : خطأ", options:["وابل : طل","سعادة : فرح","إحساس : شعور"], correct:"سعادة : فرح"},
-  {q:"مشجعين : ملعب", options:["رسالة : ظرف","طلاب : فسحة","قطار : سكة","عصفور : جو"], correct:"قطار : سكة"},
-  {q:"نقود : مصرف", options:["معهد : جامعة","شاي : سكر","عصفور : قفص","زبيب : عنب"], correct:"عصفور : قفص"},
-  {q:"أبحاث : تطور", options:["عمل : شهادة","تجارة : استثمار","شيب : ضعف","فوز : جهد"], correct:"شيب : ضعف"},
-  {q:"السماء : الكواكب", options:["النمور : الحيوانات","المرأة : الذهب","المكتبة : الكتب","الإنسان : الماء"], correct:"المكتبة : الكتب"},
-  {q:"كمثرى : رمان", options:["جبنة : لبنة","كرز : لوز","حديد : خشب","مال : نفط"], correct:"جبنة : لبنة"},
-  {q:"وضوء : صلاة", options:["تجربة : حكم","ثقافة : إطلاع"], correct:"تجربة : حكم"}
+  {q:"ولوج : دخول", options:["أسد : ليث","معركة : ساحة","ثوب : لباس","ليل : مساء"], correct:"أسد : ليث"}
 ];
 
 let current = 0;
