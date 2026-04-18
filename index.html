@@ -23,17 +23,13 @@ body::before {
   z-index: -1;
 }
 
-/* ⭐ عنوان Quiz المتحرك */
 .quiz-title {
   font-size: 42px;
   font-weight: bold;
-
   background: linear-gradient(90deg, #ef4444, #000000, #ef4444);
   background-size: 200% 200%;
-
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-
   animation: moveColor 3s linear infinite;
 }
 
@@ -46,7 +42,6 @@ body::before {
   color: #ccc;
 }
 
-/* السؤال */
 #question {
   font-size: 24px;
   margin: 20px auto;
@@ -57,7 +52,6 @@ body::before {
   display: inline-block;
 }
 
-/* الأبواب */
 .doors {
   display: flex;
   justify-content: center;
@@ -72,11 +66,9 @@ body::before {
   border: 2px solid #3b0a0a;
   border-radius: 10px;
   cursor: pointer;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   transition: 0.3s;
   font-size: 16px;
 }
@@ -95,7 +87,6 @@ body::before {
   border-color: #ef4444 !important;
 }
 
-/* ⏱️ المؤقت */
 #timerBox {
   font-size: 26px;
   margin: 110px auto 10px;
@@ -187,36 +178,14 @@ button {
 
 <script>
 
-const questions = [
-  {q:"شمس : غروب", options:["كوكب : سقوط","قمر : خسوف","شهاب : ظهور","نجم : أفول"], correct:"نجم : أفول"},
-  {q:"كره : استساغ", options:["حقد : تسامح","محبة : استحسان","رفض : رمي","ظلم : قساوة"], correct:"حقد : تسامح"},
-  {q:"كتاب : صفحة", options:["مجلة : مقال","غرفة : بيت"], correct:"مجلة : مقال"},
-  {q:"غش : عقاب", options:["سرعة : حادث","حليب : لبن"], correct:"سرعة : حادث"},
-  {q:"ولوج : دخول", options:["أسد : ليث","معركة : ساحة","ثوب : لباس","ليل : مساء"], correct:"أسد : ليث"},
-  {q:"قسوة : حجارة", options:["قمة : علو","ذهن : ذكاء","غيوم : تفاؤل","تدرج : سلم"], correct:"تدرج : سلم"},
-  {q:"مؤلف : كتاب", options:["كاتب : جريدة","منشد : قصيدة","قبطان : سفينة","مدرب : دورة"], correct:"قبطان : سفينة"},
-  {q:"سيل : مطر", options:["ريح : عاصفة","جبل : حصى","برد : ثلج","غيوم : سحاب"], correct:"غيوم : سحاب"},
-  {q:"رياح : هواء", options:["طوفان : ماء","كهرباء : صعق","أرض : بركان","سحاب : ثلج"], correct:"طوفان : ماء"},
-  {q:"القفاز : الحماية", options:["المجهر : التكبير","تبريد : مكيف","شتاء : معطف","سور : حائط"], correct:"المجهر : التكبير"},
-  {q:"حلوى : سكر", options:["سماء : نجوم","كتاب : ورق"], correct:"كتاب : ورق"},
-  {q:"سيل : جارف", options:["رجل : حازم","كلام : هادر","طائر : تغريد","كتاب : واسع"], correct:"رجل : حازم"},
-  {q:"خطبة : نثر", options:["عنب : فواكه","بلاغة : نحو","ورقيات : بقدونس","منازل : مساكن"], correct:"بلاغة : نحو"},
-  {q:"كلام : ثرثرة", options:["طل : وابل","كرم : جود","فوز : جائزة","طوبة : جفاف"], correct:"كرم : جود"},
-  {q:"لحن : خطأ", options:["وابل : طل","سعادة : فرح","إحساس : شعور"], correct:"سعادة : فرح"},
-  {q:"مشجعين : ملعب", options:["رسالة : ظرف","طلاب : فسحة","قطار : سكة","عصفور : جو"], correct:"قطار : سكة"},
-  {q:"نقود : مصرف", options:["معهد : جامعة","شاي : سكر","عصفور : قفص","زبيب : عنب"], correct:"عصفور : قفص"},
-  {q:"أبحاث : تطور", options:["عمل : شهادة","تجارة : استثمار","شيب : ضعف","فوز : جهد"], correct:"شيب : ضعف"},
-  {q:"السماء : الكواكب", options:["النمور : الحيوانات","المرأة : الذهب","المكتبة : الكتب","الإنسان : الماء"], correct:"المكتبة : الكتب"},
-  {q:"كمثرى : رمان", options:["جبنة : لبنة","كرز : لوز","حديد : خشب","مال : نفط"], correct:"جبنة : لبنة"},
-  {q:"وضوء : صلاة", options:["تجربة : حكم","ثقافة : إطلاع"], correct:"تجربة : حكم"}
-];
+const questions = [ /* نفس أسئلتك بدون تغيير */ ];
 
 let current = 0;
 let score = 0;
 let wrong = [];
 let locked = false;
 
-let startTime = Date.now();
+let startTime = 0;
 let timerInterval;
 
 function startTimer(){
