@@ -5,31 +5,44 @@
 <title>Quiz</title>
 
 <style>
-body {
+html, body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
   font-family: Arial;
   color: white;
   text-align: center;
   overflow-x: hidden;
-  background: url("dth.jpg") no-repeat center center fixed;
+
+  background-image: url("dth.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
   background-size: cover;
+  background-attachment: fixed;
 }
 
+/* طبقة التعتيم */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.65);
-  z-index: -1;
 }
 
+/* ⭐ عنوان Quiz المتحرك */
 .quiz-title {
   font-size: 42px;
   font-weight: bold;
+
   background: linear-gradient(90deg, #ef4444, #000000, #ef4444);
   background-size: 200% 200%;
+
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+
   animation: moveColor 3s linear infinite;
 }
 
@@ -42,6 +55,7 @@ body::before {
   color: #ccc;
 }
 
+/* السؤال */
 #question {
   font-size: 24px;
   margin: 20px auto;
@@ -52,6 +66,7 @@ body::before {
   display: inline-block;
 }
 
+/* الأبواب */
 .doors {
   display: flex;
   justify-content: center;
@@ -66,9 +81,11 @@ body::before {
   border: 2px solid #3b0a0a;
   border-radius: 10px;
   cursor: pointer;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   transition: 0.3s;
   font-size: 16px;
 }
@@ -77,6 +94,7 @@ body::before {
   transform: scale(1.07);
 }
 
+/* الصح والخطأ */
 .correct {
   background: #14532d !important;
   border-color: #22c55e !important;
@@ -87,16 +105,7 @@ body::before {
   border-color: #ef4444 !important;
 }
 
-#timerBox {
-  font-size: 26px;
-  margin: 110px auto 10px;
-  padding: 14px 22px;
-  background: rgba(10,10,10,0.95);
-  border: 2px solid #3b0a0a;
-  border-radius: 12px;
-  display: inline-block;
-}
-
+/* الأخطاء */
 #errorScreen {
   display: none;
   padding: 20px;
@@ -135,6 +144,7 @@ body::before {
   margin-top: 5px;
 }
 
+/* زر */
 button {
   margin-top: 15px;
   padding: 10px;
@@ -144,6 +154,7 @@ button {
   cursor: pointer;
 }
 
+/* الاسم */
 .footer {
   position: fixed;
   bottom: 15px;
@@ -164,8 +175,6 @@ button {
 <div id="gameScreen">
   <div id="question"></div>
   <div class="doors" id="doors"></div>
-
-  <div id="timerBox">الوقت: 0:00</div>
 </div>
 
 <div id="errorScreen">
@@ -178,29 +187,34 @@ button {
 
 <script>
 
-const questions = [ /* نفس أسئلتك بدون تغيير */ ];
+const questions = [
+  {q:"شمس : غروب", options:["كوكب : سقوط","قمر : خسوف","شهاب : ظهور","نجم : أفول"], correct:"نجم : أفول"},
+  {q:"كره : استساغ", options:["حقد : تسامح","محبة : استحسان","رفض : رمي","ظلم : قساوة"], correct:"حقد : تسامح"},
+  {q:"كتاب : صفحة", options:["مجلة : مقال","غرفة : بيت"], correct:"مجلة : مقال"},
+  {q:"غش : عقاب", options:["سرعة : حادث","حليب : لبن"], correct:"سرعة : حادث"},
+  {q:"ولوج : دخول", options:["أسد : ليث","معركة : ساحة","ثوب : لباس","ليل : مساء"], correct:"أسد : ليث"},
+  {q:"قسوة : حجارة", options:["قمة : علو","ذهن : ذكاء","غيوم : تفاؤل","تدرج : سلم"], correct:"تدرج : سلم"},
+  {q:"مؤلف : كتاب", options:["كاتب : جريدة","منشد : قصيدة","قبطان : سفينة","مدرب : دورة"], correct:"قبطان : سفينة"},
+  {q:"سيل : مطر", options:["ريح : عاصفة","جبل : حصى","برد : ثلج","غيوم : سحاب"], correct:"غيوم : سحاب"},
+  {q:"رياح : هواء", options:["طوفان : ماء","كهرباء : صعق","أرض : بركان","سحاب : ثلج"], correct:"طوفان : ماء"},
+  {q:"القفاز : الحماية", options:["المجهر : التكبير","تبريد : مكيف","شتاء : معطف","سور : حائط"], correct:"المجهر : التكبير"},
+  {q:"حلوى : سكر", options:["سماء : نجوم","كتاب : ورق"], correct:"كتاب : ورق"},
+  {q:"سيل : جارف", options:["رجل : حازم","كلام : هادر","طائر : تغريد","كتاب : واسع"], correct:"رجل : حازم"},
+  {q:"خطبة : نثر", options:["عنب : فواكه","بلاغة : نحو","ورقيات : بقدونس","منازل : مساكن"], correct:"بلاغة : نحو"},
+  {q:"كلام : ثرثرة", options:["طل : وابل","كرم : جود","فوز : جائزة","طوبة : جفاف"], correct:"كرم : جود"},
+  {q:"لحن : خطأ", options:["وابل : طل","سعادة : فرح","إحساس : شعور"], correct:"سعادة : فرح"},
+  {q:"مشجعين : ملعب", options:["رسالة : ظرف","طلاب : فسحة","قطار : سكة","عصفور : جو"], correct:"قطار : سكة"},
+  {q:"نقود : مصرف", options:["معهد : جامعة","شاي : سكر","عصفور : قفص","زبيب : عنب"], correct:"عصفور : قفص"},
+  {q:"أبحاث : تطور", options:["عمل : شهادة","تجارة : استثمار","شيب : ضعف","فوز : جهد"], correct:"شيب : ضعف"},
+  {q:"السماء : الكواكب", options:["المكتبة : الكتب","الإنسان : الماء"], correct:"المكتبة : الكتب"},
+  {q:"كمثرى : رمان", options:["جبنة : لبنة","كرز : لوز","حديد : خشب","مال : نفط"], correct:"جبنة : لبنة"},
+  {q:"وضوء : صلاة", options:["تجربة : حكم","ثقافة : إطلاع"], correct:"تجربة : حكم"}
+];
 
 let current = 0;
 let score = 0;
 let wrong = [];
 let locked = false;
-
-let startTime = 0;
-let timerInterval;
-
-function startTimer(){
-  clearInterval(timerInterval);
-  startTime = Date.now();
-
-  timerInterval = setInterval(()=>{
-    let sec = Math.floor((Date.now() - startTime)/1000);
-    let min = Math.floor(sec/60);
-    let r = sec%60;
-
-    document.getElementById("timerBox").innerText =
-      "الوقت: " + min + ":" + (r<10?"0"+r:r);
-  },1000);
-}
 
 function shuffle(a){
   return a.sort(()=>Math.random()-0.5);
@@ -219,7 +233,7 @@ function show(){
     const d = document.createElement("div");
     d.className = "door";
     d.innerText = opt;
-    d.onclick = ()=>check(opt,d);
+    d.onclick = ()=>check(opt, d);
     box.appendChild(d);
   });
 }
@@ -249,8 +263,6 @@ function check(opt, door){
 }
 
 function end(){
-  clearInterval(timerInterval);
-
   document.getElementById("gameScreen").style.display="none";
   document.getElementById("errorScreen").style.display="block";
 
@@ -280,11 +292,9 @@ function restart(){
   document.getElementById("errorScreen").style.display="none";
   document.getElementById("gameScreen").style.display="block";
 
-  startTimer();
   show();
 }
 
-startTimer();
 show();
 
 </script>
