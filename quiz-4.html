@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Quiz</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  color: white;
+  text-align: center;
+  overflow-x: hidden;
+  background: url("dth.jpg") no-repeat center center fixed;
+  background-size: cover;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: -1;
+}
+
+.quiz-title {
+  font-size: 42px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ef4444, #000000, #ef4444);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: moveColor 3s linear infinite;
+}
+
+@keyframes moveColor {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.subtitle {
+  color: #ccc;
+}
+
+#passageBox {
+  font-size: 18px;
+  margin: 20px auto;
+  padding: 15px;
+  max-width: 800px;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid #444;
+  border-radius: 12px;
+  line-height: 1.8;
+}
+
+#question {
+  font-size: 24px;
+  margin: 20px auto;
+  padding: 18px;
+  background: rgba(10,10,10,0.95);
+  border: 2px solid #3b0a0a;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.doors {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 25px;
+}
+
+.door {
+  width: 170px;
+  height: 230px;
+  background: rgba(10,10,10,0.95);
+  border: 2px solid #3b0a0a;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+  font-size: 20px;
+}
+
+.door:hover {
+  transform: scale(1.07);
+}
+
+.correct {
+  background: #14532d !important;
+  border-color: #22c55e !important;
+}
+
+.wrong {
+  background: #7f1d1d !important;
+  border-color: #ef4444 !important;
+}
+
+#timerBox {
+  font-size: 26px;
+  margin: 110px auto 10px;
+  padding: 14px 22px;
+  background: rgba(10,10,10,0.95);
+  border: 2px solid #3b0a0a;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+#errorScreen {
+  display: none;
+  padding: 20px;
+}
+
+.errorCard {
+  background: rgba(0,0,0,0.85);
+  border: 1px solid #444;
+  border-radius: 12px;
+  margin: 15px auto;
+  padding: 15px;
+  max-width: 650px;
+  text-align: right;
+}
+
+.errorQ {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.optionsList {
+  color: #cbd5e1;
+  margin-bottom: 10px;
+}
+
+.userWrong {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.correctAns {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px;
+  background: #111;
+  color: white;
+  border: 1px solid #444;
+  cursor: pointer;
+}
+
+.footer {
+  position: fixed;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+</style>
+</head>
+
+<body>
+
+<h1 class="quiz-title">Quiz</h1>
+<div class="subtitle">استيعاب المقروء</div>
+
+<div id="gameScreen">
+  <div id="passageBox"></div>
+  <div id="question"></div>
+  <div class="doors" id="doors"></div>
+  <div id="timerBox">الوقت: 0:00</div>
+</div>
+
+<div id="errorScreen">
+  <h2>الأخطاء</h2>
+  <div id="errorsList"></div>
+  <button onclick="restart()">إعادة</button>
+</div>
+
+<div class="footer">by 0xRaph</div>
+
+<script>
+
+let passageIndex = 0;
+let questionIndex = 0;
+let score = 0;
+let wrong = [];
+let locked = false;
+
+let startTime = Date.now();
+let timerInterval;
+
+const passages = [
+  {
+    text: "سُئل أحدهم : ما تظن الناس يقولون فيك ؟! قال : إني لميت وأنهم لميتون ، وإني لوحدي محاسب ، وأنهم لوحدهم محاسبون ، فما لي وما يقولون.",
+    questions: [
+      {
+        q: "من أجاب عن هذا السؤال ؟ // صاحب هذا الرد :",
+        options: ["حكيم","فيلسوف","شاعر","جريء"],
+        correct: "حكيم"
+      },
+      {
+        q: "(إني لميت وأنهم لميتون) تعتبر :",
+        options: ["من الفأل","امتثال","اقتباس","يأس"],
+        correct: "اقتباس"
+      }
+    ]
+  },
+  {
+    text: "كلام الناس كالصخر ، إما أن تحمله على ظهرك فينكسر ، أو تبني به برجاً تحت أقدامك فتنتصر.",
+    questions: [
+      {
+        q: "تعني هذه الجملة أن كلام الناس :",
+        options: ["ثقيل على النفس","كالصخر في قسوته","قد يُطاق وقد لا يُطاق","قد يحبطك وقد يحفزك"],
+        correct: "قد يحبطك وقد يحفزك"
+      },
+      {
+        q: "المقصود بالذي ينكسر هو :",
+        options: ["الكلام","الظهر","الصخر","البرج"],
+        correct: "الظهر"
+      }
+    ]
+  },
+  {
+    text: "تشترك اللغة العربية مع لغات أخرى في ظاهرة الأضداد اللغوي...",
+    questions: [
+      {
+        q: "ظاهرة الأضداد في اللغة العربية بالنسبة للغات الأخرى تعتبر :",
+        options: ["حيادية","نادرة","عامة","خاصة"],
+        correct: "خاصة"
+      },
+      {
+        q: "يمكن أن نستبدل كلمة (يفوق) بـ:",
+        options: ["يتجاوز","قرابة"],
+        correct: "يتجاوز"
+      },
+      {
+        q: "العلاقة بين (القبول) و(الرفض):",
+        options: ["تضاد","سبب لنتيجة","نتيجة لسبب","ترادف"],
+        correct: "تضاد"
+      },
+      {
+        q: "الضمير في (منها) يعود على:",
+        options: ["اللفظة","الأسباب","اللغة"],
+        correct: "الأسباب"
+      },
+      {
+        q: "(الناهل) تعني:",
+        options: ["الظمآن","المرتوي","المنكفئ"],
+        correct: "الظمآن"
+      },
+      {
+        q: "العلماء كانوا:",
+        options: ["متفقين","مختلفين","ثلاث أقسام","أربع أقسام"],
+        correct: "مختلفين"
+      },
+      {
+        q: "لماذا سمي الملدوغ سليماً؟",
+        options: ["للتفاؤل"],
+        correct: "للتفاؤل"
+      }
+    ]
+  },
+  {
+    text: "في معركة اليرموك جرح الحارث بن هشام وعكرمة...",
+    questions: [
+      {
+        q: "معنى كلمة صرعى:",
+        options: ["عطشى","هلكى","جرحى","موتى"],
+        correct: "جرحى"
+      }
+    ]
+  },
+  {
+    text: "إن احتضان الآباء للأبناء يزيد من ذكائهم ويخلصهم من القلق...",
+    questions: [
+      {
+        q: "عدد الحالات السلبية:",
+        options: ["1","2","4","5"],
+        correct: "2"
+      }
+    ]
+  },
+  {
+    text: "في مطلع الستينات بدأت فرنسا تلاحظ قلة عدد المواليد...",
+    questions: [
+      {
+        q: "كيف نوازن بين المواليد والأموات؟",
+        options: ["طفل ونصف","أكثر من طفلين","أكثر من ثلاثة","أربعة"],
+        correct: "أكثر من طفلين"
+      },
+      {
+        q: "الفرق الزمني:",
+        options: ["عقدين","3 عقود","4 عقود","5 عقود"],
+        correct: "عقدين"
+      }
+    ]
+  },
+  {
+    text: "تعد كسوة الكعبة المشرفة من أهم مظاهر التبجيل...",
+    questions: [
+      {
+        q: "متى بدأت السعودية الصناعة؟",
+        options: ["أوائل السابع","أوائل الثامن","آخر السابع","آخر الثامن"],
+        correct: "أوائل الثامن"
+      },
+      {
+        q: "الجد الأعلى يقصد به:",
+        options: ["الأعلى منزلة","الجد القديم","أقدم جد","الأكثر شرفاً"],
+        correct: "أقدم جد"
+      },
+      {
+        q: "اختلف المؤرخون تعني:",
+        options: ["تقاطعت دروب","تباين أقوال","مواقف",""],
+        correct: "تباين أقوال"
+      }
+    ]
+  },
+  {
+    text: "الحرنكش ثمرة صغيرة مفيدة...",
+    questions: [
+      {
+        q: "ملمس أوراقه:",
+        options: ["لينة","القسوة"],
+        correct: "القسوة"
+      },
+      {
+        q: "استخدام الفراعنة:",
+        options: ["وقاية","علاج","طعام"],
+        correct: "علاج"
+      }
+    ]
+  },
+  {
+    text: "اعلم أن الحسد اسم لما فضل عن المنافسة...",
+    questions: [
+      {
+        q: "أسلوب النص:",
+        options: ["السخرية","الجدية","التحليل"],
+        correct: "السخرية"
+      },
+      {
+        q: "غرض الاستفهام:",
+        options: ["التقرير","الظن","الاستفسار","النفي"],
+        correct: "التقرير"
+      }
+    ]
+  },
+  {
+    text: "هناك أمراض مزمنة مثل السكري والسمنة...",
+    questions: [
+      {
+        q: "الأكثر تسبباً بالموت:",
+        options: ["السكر والبدانة","الملاريا","السل","الانفلونزا"],
+        correct: "السكر والبدانة"
+      }
+    ]
+  },
+  {
+    text: "قال سفيان الثوري...",
+    questions: [
+      {
+        q: "استعمل تعني:",
+        options: ["اتخذ","استخدم","تأمل","نظر"],
+        correct: "استخدم"
+      },
+      {
+        q: "نستنتج:",
+        options: ["رد العمل","كشف الكذب"],
+        correct: "كشف الكذب"
+      }
+    ]
+  },
+  {
+    text: "القليل من الإصرار يقابله الإنجاز...",
+    questions: [
+      {
+        q: "الترتيب الصحيح:",
+        options: [
+          "الإصرار – الفشل – الإنجاز – النجاح",
+          "الفشل – الإصرار – الإنجاز – النجاح"
+        ],
+        correct: "الفشل – الإصرار – الإنجاز – النجاح"
+      }
+    ]
+  }
+];
+
+function shuffle(a){
+  return a.sort(()=>Math.random()-0.5);
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  startTime = Date.now();
+  timerInterval = setInterval(()=>{
+    let sec = Math.floor((Date.now()-startTime)/1000);
+    let m = Math.floor(sec/60);
+    let s = sec%60;
+    document.getElementById("timerBox").innerText = `الوقت: ${m}:${s<10?"0"+s:s}`;
+  },1000);
+}
+
+function show(){
+  locked = false;
+
+  const p = passages[passageIndex];
+  const q = p.questions[questionIndex];
+
+  document.getElementById("passageBox").innerText = p.text;
+  document.getElementById("question").innerText = q.q;
+
+  const box = document.getElementById("doors");
+  box.innerHTML = "";
+
+  shuffle([...q.options]).forEach(opt=>{
+    const d = document.createElement("div");
+    d.className = "door";
+    d.innerText = opt;
+    d.onclick = ()=>check(opt,d);
+    box.appendChild(d);
+  });
+}
+
+function check(opt,door){
+  if(locked) return;
+  locked = true;
+
+  const p = passages[passageIndex];
+  const q = p.questions[questionIndex];
+
+  if(opt===q.correct){
+    score++;
+    door.classList.add("correct");
+  } else {
+    door.classList.add("wrong");
+    wrong.push({q:q.q, options:q.options, your:opt, correct:q.correct});
+  }
+
+  setTimeout(()=>{
+    questionIndex++;
+    if(questionIndex >= p.questions.length){
+      questionIndex = 0;
+      passageIndex++;
+    }
+
+    if(passageIndex >= passages.length){
+      end();
+    } else {
+      show();
+    }
+  },500);
+}
+
+function end(){
+  clearInterval(timerInterval);
+
+  document.getElementById("gameScreen").style.display="none";
+  document.getElementById("errorScreen").style.display="block";
+
+  const list = document.getElementById("errorsList");
+  list.innerHTML="";
+
+  wrong.forEach(e=>{
+    list.innerHTML += `
+    <div class="errorCard">
+      <div class="errorQ">${e.q}</div>
+      <div class="optionsList">${e.options.join("<br>")}</div>
+      <div class="userWrong">إجابتك: ${e.your}</div>
+      <div class="correctAns">الصحيح: ${e.correct}</div>
+    </div>`;
+  });
+
+  list.innerHTML += `<h3>${score} / ${passages.reduce((a,p)=>a+p.questions.length,0)}</h3>`;
+}
+
+function restart(){
+  passageIndex=0;
+  questionIndex=0;
+  score=0;
+  wrong=[];
+
+  document.getElementById("errorScreen").style.display="none";
+  document.getElementById("gameScreen").style.display="block";
+
+  startTimer();
+  show();
+}
+
+startTimer();
+show();
+
+</script>
+
+</body>
+</html>
